@@ -1,0 +1,862 @@
+﻿<!DOCTYPE html>
+<html lang="fr" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurateur de Gem Custom</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- EasyMDE (Simple Markdown Editor) -->
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <!-- SortableJS (Drag and Drop) -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <style>
+        /* Ajout d'une police plus moderne */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        /* Masquer la barre de statut de EasyMDE */
+        .editor-statusbar {
+            display: none !important;
+        }
+
+        /* Styles pour les boutons de déploiement/réduction */
+        .toggle-icon {
+            transition: transform 0.3s ease-in-out;
+            transform: rotate(90deg); /* 'v' (ouvert par défaut) */
+        }
+        .toggle-icon.is-closed {
+            transform: rotate(0deg); /* '>' (fermé) */
+        }
+        .collapsible-content {
+            transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out, visibility 0s 0s;
+            max-height: 2000px; /* Hauteur max par défaut (assez grand) */
+            overflow: hidden;
+            opacity: 1;
+            visibility: visible;
+        }
+        .collapsible-content.is-closed {
+            max-height: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out, visibility 0s 0.5s;
+        }
+
+        /* Styles pour le Drag-and-Drop */
+        .drag-handle-pillar, .drag-handle-sub {
+            cursor: grab;
+            transition: opacity 0.2s ease;
+        }
+        .drag-handle-pillar:hover, .drag-handle-sub:hover {
+            opacity: 0.7;
+        }
+        /* Style 'fantôme' pendant le glissement */
+        .sortable-ghost {
+            opacity: 0.4;
+            background: #e0e7ff; /* Un fond léger pour indiquer la cible */
+            border: 2px dashed #a5b4fc;
+        }
+        .sortable-ghost .subsection-card {
+            background-color: #e0e7ff !important;
+        }
+
+        /* Styles pour le Spinner Gemini */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .gemini-spinner {
+            display: inline-block;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-left-color: currentColor;
+            border-radius: 50%;
+            width: 1em;
+            height: 1em;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease-out forwards;
+            border-left: 4px solid #3b82f6;
+            max-width: 300px;
+        }
+        .toast.error { border-left-color: #ef4444; }
+        .toast.success { border-left-color: #22c55e; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(10px); }
+        }
+
+        /* Styles pour l'impression (Génération PDF) */
+        @media print {
+            body { -webkit-print-color-adjust: exact; color-adjust: exact; }
+            .no-print { display: none !important; }
+            .pillar-card { page-break-inside: avoid; box-shadow: none !important; border: 1px solid #e5e7eb; }
+            .subsection-card { page-break-inside: avoid; box-shadow: none; border-top: 1px dashed #e0e0e0; margin-top: 1rem; padding-top: 1rem; }
+            .subsection-card:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+            input[type="text"] { border: none !important; padding: 1px; font-weight: bold; color: #000 !important; }
+            input[type="text"].pillar-title { font-size: 1.5rem; color: var(--print-color, #000) !important; }
+            input[type="text"].subsection-title { font-size: 1.25rem; }
+            input[type="text"]#main-title { font-size: 2rem; text-align: center; display: block; width: 100%; margin-bottom: 2rem; }
+            .easymde-container { display: none !important; }
+            .collapsible-content { max-height: none !important; opacity: 1 !important; visibility: visible !important; overflow: visible !important; }
+            .toggle-icon { display: none !important; }
+            .print-content { display: block !important; white-space: pre-wrap; word-wrap: break-word; padding: 8px; background-color: var(--print-bg-color, #fff) !important; border-radius: 4px; color: #1f2937; }
+        }
+        .print-content { display: none; }
+
+        /* Styles EasyMDE Custom */
+        .easymde-container .CodeMirror { border: none; border-radius: 0 0 8px 8px; background-color: var(--easymde-bg, #FFFFFF); transition: background-color 0.3s ease; }
+        .easymde-container .editor-toolbar { border: none; border-bottom: 1px dashed #cccccc; background-color: var(--easymde-bg, #FFFFFF); transition: background-color 0.3s ease; }
+        .easymde-container .editor-toolbar button { color: #374151; }
+        .easymde-container .editor-toolbar button.active, .easymde-container .editor-toolbar button:hover { background: rgba(0,0,0,0.1); border-color: transparent; }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+
+        <!-- En-tête Collant -->
+        <div class="sticky top-0 z-50 bg-gray-100 -mt-4 -mx-4 md:-mt-8 md:-mx-8 px-4 md:px-8 pt-4 md:pt-8 pb-4 border-b border-gray-300 shadow-md mb-8">
+            <input type="text" id="main-title" class="text-4xl font-bold text-gray-800 bg-transparent border-b-2 border-transparent focus:border-gray-400 focus:ring-0 focus:outline-none w-full p-2 text-center" value="Mon Gem Custom" placeholder="Titre (Titre niv. 1)">
+            
+            <!-- Légende Visuelle -->
+            <div class="flex flex-wrap justify-center gap-3 mt-3 text-xs md:text-sm text-gray-700">
+                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Exemple : le ton">
+                    <span class="font-bold mr-2">Gras</span> <span class="text-gray-600">: Personnalité</span>
+                </div>
+                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Exemple : mode atelier">
+                    <span class="italic mr-2">Italique</span> <span class="text-gray-600">: Concept</span>
+                </div>
+                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Règle absolue non négociable">
+                    <span class="font-bold italic mr-2 text-xs">Double Emphase</span> <span class="text-gray-600">: Règle Absolue</span>
+                </div>
+                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 border-l-4 border-l-gray-500 cursor-help" title="Règle critique ou phrase type">
+                    <span class="mr-2 font-semibold text-gray-500">Quote</span> <span class="text-gray-600">: Critique/Phrase type</span>
+                </div>
+                <div class="flex items-center px-2 py-1 bg-gray-800 text-white rounded shadow-sm border border-gray-700 cursor-help" title="Commandes ou termes à reproduire exactement">
+                    <span class="font-mono mr-2 bg-gray-700 px-1 rounded">Code</span> <span class="text-gray-300">: Termes exacts</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteneur des piliers -->
+        <main id="pillars-container" class="space-y-6">
+            <!-- Les piliers seront injectés ici par JS -->
+        </main>
+
+        <!-- Bouton d'ajout de pilier -->
+        <div class="mt-8 text-center no-print">
+            <button id="add-pillar-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
+                Ajouter un Pilier (Titre niv. 2)
+            </button>
+        </div>
+
+        <!-- Pied de page avec les actions -->
+        <footer class="mt-12 pt-6 border-t border-gray-300 no-print">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4 text-center">Actions</h3>
+            <div class="flex flex-wrap justify-center gap-4 items-center">
+                <button id="settings-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-3 rounded-lg shadow transition-colors" title="Configuration API">
+                    ⚙️
+                </button>
+                <div class="h-8 w-px bg-gray-300 mx-2"></div>
+                <button id="export-md-btn" class="bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-5 rounded-lg shadow transition-colors">
+                    Générer le Markdown
+                </button>
+                <button id="export-pdf-btn" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-5 rounded-lg shadow transition-colors">
+                    Générer un PDF
+                </button>
+                <button id="export-json-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-5 rounded-lg shadow transition-colors">
+                    Exporter (JSON)
+                </button>
+                <button id="import-json-btn" class="bg-yellow-500 hover:bg-yellow-600 text-gray-800 font-medium py-2 px-5 rounded-lg shadow transition-colors">
+                    Importer (JSON)
+                </button>
+                <button id="analyze-gemini-btn" class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-medium py-2 px-5 rounded-lg shadow transition-all flex items-center space-x-2">
+                    <span class="gemini-btn-text">✨ Analyser</span>
+                    <span class="gemini-spinner hidden"></span>
+                </button>
+                <input type="file" id="json-file-input" accept=".json" class="hidden">
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Conteneur de Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Modale Settings API -->
+    <div id="settings-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">Configuration API</h3>
+                <button id="close-settings-btn" class="text-gray-400 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-600 mb-4">Entrez votre clé API Gemini pour activer les fonctions IA (Suggérer, Reformuler, Analyser).</p>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Clé API Gemini</label>
+                <input type="password" id="api-key-input" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="AIzaSy...">
+                <p class="text-xs text-gray-500 mt-2">La clé est stockée uniquement dans votre navigateur.</p>
+            </div>
+            <div class="p-4 border-t bg-gray-50 rounded-b-lg flex justify-end">
+                <button id="save-api-key-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale de Reformulation (Comparaison) -->
+    <div id="reformulation-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold text-purple-700 flex items-center gap-2">
+                    <span class="text-2xl">✨</span> Suggestion de Reformulation
+                </h3>
+                <button id="close-reformulation-btn" class="text-gray-400 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50">
+                <!-- Original -->
+                <div class="flex flex-col">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Texte Original</label>
+                    <div id="original-text-display" class="w-full h-64 p-3 border border-gray-300 rounded-md bg-gray-100 text-gray-600 overflow-y-auto text-sm whitespace-pre-wrap"></div>
+                </div>
+                <!-- Suggestion -->
+                <div class="flex flex-col">
+                    <label class="block text-sm font-bold text-purple-700 mb-2">Suggestion IA (Éditable)</label>
+                    <!-- MODIFICATION: Textarea sans readonly pour l'édition -->
+                    <textarea id="suggested-text-display" class="w-full p-3 border border-purple-300 rounded-md bg-white text-gray-800 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea>
+                    <p class="text-xs text-gray-500 mt-1">Vous pouvez modifier le texte avant de l'appliquer.</p>
+                </div>
+            </div>
+            <div class="p-4 border-t bg-white rounded-b-lg flex justify-end space-x-3">
+                <button id="cancel-reformulation-btn" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    Conserver l'original
+                </button>
+                <button id="apply-reformulation-btn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 shadow-md transition-colors flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                    Tout remplacer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Markdown -->
+    <div id="markdown-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">Instructions Markdown</h3>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto">
+                <pre id="markdown-output" class="bg-gray-50 p-4 rounded-md text-sm whitespace-pre-wrap word-wrap break-words"></pre>
+            </div>
+            <div class="p-4 border-t bg-gray-50 rounded-b-lg">
+                <button id="copy-md-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Copier dans le presse-papiers
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Analyse Gemini -->
+    <div id="analysis-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">✨ Analyse de la Configuration</h3>
+                <button id="close-analysis-modal-btn" class="text-gray-400 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="analysis-output-container" class="p-6 overflow-y-auto">
+                <div id="analysis-loading" class="text-center py-10">
+                    <div class="gemini-spinner mx-auto text-purple-600" style="width: 2rem; height: 2rem; border-width: 3px;"></div>
+                    <p class="mt-4 text-gray-600 font-medium">Analyse en cours... Gemini réfléchit.</p>
+                </div>
+                <pre id="analysis-output" class="bg-gray-50 p-4 rounded-md text-sm whitespace-pre-wrap word-wrap break-words hidden"></pre>
+            </div>
+            <div class="p-4 border-t bg-gray-50 rounded-b-lg">
+                <button id="copy-analysis-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" disabled>
+                    Copier l'analyse
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const pillarsContainer = document.getElementById('pillars-container');
+            const addPillarBtn = document.getElementById('add-pillar-btn');
+            const mainTitleInput = document.getElementById('main-title');
+            
+            // Modales
+            const modal = document.getElementById('markdown-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const markdownOutput = document.getElementById('markdown-output');
+            const copyMdBtn = document.getElementById('copy-md-btn');
+            
+            const analysisModal = document.getElementById('analysis-modal');
+            const analysisOutput = document.getElementById('analysis-output');
+            const analysisLoading = document.getElementById('analysis-loading');
+            const copyAnalysisBtn = document.getElementById('copy-analysis-btn');
+
+            const settingsModal = document.getElementById('settings-modal');
+            const apiKeyInput = document.getElementById('api-key-input');
+            const saveApiKeyBtn = document.getElementById('save-api-key-btn');
+            const closeSettingsBtn = document.getElementById('close-settings-btn');
+            const settingsBtn = document.getElementById('settings-btn');
+
+            // AJOUT: Éléments de la modale de reformulation
+            const reformulationModal = document.getElementById('reformulation-modal');
+            const closeReformulationBtn = document.getElementById('close-reformulation-btn');
+            const originalTextDisplay = document.getElementById('original-text-display');
+            const suggestedTextDisplay = document.getElementById('suggested-text-display');
+            const applyReformulationBtn = document.getElementById('apply-reformulation-btn');
+            const cancelReformulationBtn = document.getElementById('cancel-reformulation-btn');
+            let currentEditorInstance = null;
+            // AJOUT: Variable pour l'instance EasyMDE de la modale
+            let reformulationMDE = null;
+
+            // Buttons
+            const exportMdBtn = document.getElementById('export-md-btn');
+            const exportPdfBtn = document.getElementById('export-pdf-btn');
+            const exportJsonBtn = document.getElementById('export-json-btn');
+            const importJsonBtn = document.getElementById('import-json-btn');
+            const jsonFileInput = document.getElementById('json-file-input');
+            const analyzeGeminiBtn = document.getElementById('analyze-gemini-btn');
+
+            let mdeInstances = new Map();
+            let currentColorIndex = 0;
+
+            // Constante définie vide, chargée par l'environnement ou via le modal Settings
+            const apiKey = ""; 
+
+            const colorSets = [
+                { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-300', ring: 'focus:ring-blue-400', easymdeBg: '#EFF6FF', printBg: '#EFF6FF', printText: '#1E40AF' },
+                { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-300', ring: 'focus:ring-green-400', easymdeBg: '#ECFDF5', printBg: '#ECFDF5', printText: '#166534' },
+                { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-300', ring: 'focus:ring-yellow-400', easymdeBg: '#FEFCE8', printBg: '#FEFCE8', printText: '#854D0E' },
+                { bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-300', ring: 'focus:ring-purple-400', easymdeBg: '#F5F3FF', printBg: '#F5F3FF', printText: '#5B21B6' },
+                { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-300', ring: 'focus:ring-red-400', easymdeBg: '#FEF2F2', printBg: '#FEF2F2', printText: '#991B1B' },
+                { bg: 'bg-indigo-100', text: 'text-indigo-800', border: 'border-indigo-300', ring: 'focus:ring-indigo-400', easymdeBg: '#EEF2FF', printBg: '#EEF2FF', printText: '#3730A3' }
+            ];
+
+            function getNextColorSet() {
+                const color = colorSets[currentColorIndex];
+                currentColorIndex = (currentColorIndex + 1) % colorSets.length;
+                return color;
+            }
+
+            function getTimestamp() {
+                const now = new Date();
+                return `${String(now.getDate()).padStart(2,'0')}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getFullYear()).slice(-2)}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+            }
+
+            // --- Notification System ---
+            function showToast(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `<span>${message}</span>`;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.animation = 'fadeOut 0.3s ease-out forwards';
+                    toast.addEventListener('animationend', () => toast.remove());
+                }, 3000);
+            }
+
+            // --- Settings Logic ---
+            settingsBtn.addEventListener('click', () => {
+                apiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
+                settingsModal.classList.remove('hidden');
+            });
+            closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+            saveApiKeyBtn.addEventListener('click', () => {
+                const key = apiKeyInput.value.trim();
+                if (key) {
+                    localStorage.setItem('gemini_api_key', key);
+                    showToast('Clé API enregistrée !', 'success');
+                } else {
+                    localStorage.removeItem('gemini_api_key');
+                    showToast('Clé API supprimée.', 'info');
+                }
+                settingsModal.classList.add('hidden');
+            });
+
+
+            // --- API Calls ---
+            async function retryFetch(url, options, retries = 3, delay = 1000) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        if (response.status === 429 && retries > 0) {
+                            await new Promise(res => setTimeout(res, delay));
+                            return retryFetch(url, options, retries - 1, delay * 2);
+                        }
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                } catch (error) {
+                    if (retries > 0) {
+                        await new Promise(res => setTimeout(res, delay));
+                        return retryFetch(url, options, retries - 1, delay * 2);
+                    }
+                    throw error;
+                }
+            }
+
+            async function callGemini(systemPrompt, userPrompt, jsonSchema = null) {
+                // Récupérer la clé: soit celle de l'environnement, soit celle du localStorage
+                let effectiveKey = apiKey;
+                if (!effectiveKey) {
+                    effectiveKey = localStorage.getItem('gemini_api_key');
+                }
+                
+                if (!effectiveKey) {
+                    showToast("Veuillez configurer votre clé API Gemini (⚙️).", "error");
+                    return null;
+                }
+
+                const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${effectiveKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userPrompt }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: {}
+                };
+
+                if (jsonSchema) {
+                    payload.generationConfig = { responseMimeType: "application/json", responseSchema: jsonSchema };
+                }
+
+                try {
+                    const result = await retryFetch(geminiApiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const candidate = result.candidates?.[0];
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        return candidate.content.parts[0].text;
+                    } else {
+                        throw new Error("Réponse invalide de l'IA.");
+                    }
+                } catch (error) {
+                    console.error(error);
+                    showToast(`Erreur IA: ${error.message}`, 'error');
+                    return null;
+                }
+            }
+
+            // --- Creation Functions ---
+
+            function createSubsection(title = 'Nouvelle Sous-section', content = '', colorSet, isClosed = false) {
+                const subDiv = document.createElement('div');
+                subDiv.className = 'subsection-card p-4 rounded-lg shadow-sm transition-all duration-300 ease-in-out';
+                subDiv.style.backgroundColor = colorSet.easymdeBg;
+                
+                const uniqueId = `mde-${crypto.randomUUID()}`;
+                
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'flex justify-between items-center mb-2';
+                headerDiv.innerHTML = `
+                    <div class="flex items-center space-x-1 w-full">
+                        <button class="drag-handle-sub no-print text-gray-400 hover:text-gray-600 p-1 rounded-full transition-colors" tabindex="-1">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor"><path d="M4 6H20M4 12H20M4 18H20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        </button>
+                        <div class="flex items-center space-x-1 w-full cursor-pointer toggle-subsection-btn">
+                            <button class="toggle-btn no-print text-gray-400 hover:text-gray-600 p-1 rounded-full transition-colors" tabindex="-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 toggle-icon ${isClosed ? 'is-closed' : ''}" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                            </button>
+                            <input type="text" class="subsection-title text-lg font-medium text-gray-800 bg-transparent border-b border-transparent ${colorSet.ring} focus:border-gray-400 focus:ring-0 focus:outline-none w-full p-1" value="${title}" placeholder="Titre (Titre niv. 3)">
+                        </div>
+                    </div>
+                    <button class="delete-subsection-btn no-print text-gray-400 hover:text-red-600 transition-colors p-1 rounded-full ml-2 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                    </button>
+                `;
+                subDiv.appendChild(headerDiv);
+                
+                const editorDiv = document.createElement('div');
+                editorDiv.className = `subsection-content-wrapper collapsible-content ${isClosed ? 'is-closed' : ''}`; 
+                
+                const textarea = document.createElement('textarea');
+                textarea.id = uniqueId;
+                editorDiv.appendChild(textarea);
+                
+                const printDiv = document.createElement('div');
+                printDiv.className = 'print-content';
+                printDiv.style.setProperty('--print-bg-color', colorSet.easymdeBg);
+                editorDiv.appendChild(printDiv);
+                subDiv.appendChild(editorDiv);
+
+                setTimeout(() => {
+                    const easyMDE = new EasyMDE({
+                        element: textarea,
+                        initialValue: content,
+                        toolbar: [
+                            'bold', 'italic', 'unordered-list', 'ordered-list', 'quote', 'code', '|',
+                            {
+                                name: "reformulate",
+                                action: (editor) => handleReformulate(editor, title),
+                                className: "fa fa-magic",
+                                title: "Rédiger / Reformuler avec l'IA",
+                                noDisable: true,
+                                icon: '<span class="flex items-center justify-center w-full h-full text-purple-600 font-bold text-lg">✨</span>'
+                            }
+                        ],
+                        status: false, spellChecker: false, minHeight: '100px',
+                        renderingConfig: { codeSyntaxHighlighting: false }
+                    });
+                    // Appliquer styles
+                    const cmElement = easyMDE.codemirror.getWrapperElement();
+                    const toolbarElement = cmElement.previousSibling;
+                    cmElement.style.setProperty('--easymde-bg', colorSet.easymdeBg);
+                    if(toolbarElement && toolbarElement.classList.contains('editor-toolbar')) {
+                        toolbarElement.style.setProperty('--easymde-bg', colorSet.easymdeBg);
+                    }
+                    mdeInstances.set(uniqueId, easyMDE);
+                    easyMDE.codemirror.on("change", () => { printDiv.textContent = easyMDE.value(); });
+                    printDiv.textContent = easyMDE.value();
+                }, 10);
+                return subDiv;
+            }
+
+            async function handleReformulate(editor, subtitle) {
+                const currentText = editor.value();
+                const subCard = editor.element.closest('.subsection-card');
+                const pillarCard = subCard.closest('.pillar-card');
+                const pillarTitle = pillarCard.querySelector('.pillar-title').value;
+                const mainTitle = mainTitleInput.value;
+
+                const cmWrapper = editor.codemirror.getWrapperElement();
+                const originalOpacity = cmWrapper.style.opacity;
+                cmWrapper.style.opacity = '0.5';
+                cmWrapper.style.pointerEvents = 'none';
+                
+                let spinnerOverlay = document.createElement('div');
+                spinnerOverlay.className = 'absolute inset-0 flex items-center justify-center z-10';
+                spinnerOverlay.innerHTML = '<div class="gemini-spinner text-purple-600" style="width: 2rem; height: 2rem; border-width: 3px;"></div>';
+                cmWrapper.parentElement.style.position = 'relative';
+                cmWrapper.parentElement.appendChild(spinnerOverlay);
+
+                let systemPrompt, userPrompt;
+                if (!currentText || currentText.trim() === "") {
+                    systemPrompt = "Tu es un assistant expert en rédaction d'instructions pour LLM (Gemini). Rédige un contenu pertinent, clair et concis pour une section de 'Custom Gem'.";
+                    userPrompt = `Contexte:\nTitre du Gem: "${mainTitle}"\nPilier: "${pillarTitle}"\nSection à rédiger: "${subtitle}"\n\nInstruction: Rédige un premier jet pertinent. Donne uniquement le contenu, sans guillemets.`;
+                } else {
+                    systemPrompt = "Tu es un expert en rédaction de prompts pour LLM. Réécris le texte pour qu'il soit plus clair, concis et structuré.";
+                    userPrompt = `Contexte:\nTitre du Gem: "${mainTitle}"\nPilier: "${pillarTitle}"\nSection: "${subtitle}"\n\nTexte à reformuler:\n"${currentText}"\n\nDonne uniquement le texte reformulé.`;
+                }
+
+                try {
+                    const finalText = await callGemini(systemPrompt, userPrompt);
+                    if (finalText) {
+                        // MODIFICATION: Au lieu de remplacer directement, on ouvre la modale
+                        currentEditorInstance = editor;
+                        originalTextDisplay.textContent = currentText || "(Champ vide)";
+                        
+                        // MODIFICATION: Initialisation ou mise à jour de l'éditeur EasyMDE dans la modale
+                        reformulationModal.classList.remove('hidden');
+                        
+                        if (!reformulationMDE) {
+                            reformulationMDE = new EasyMDE({
+                                element: document.getElementById('suggested-text-display'),
+                                initialValue: finalText,
+                                toolbar: ['bold', 'italic', 'unordered-list', 'ordered-list', 'quote', 'code'],
+                                status: false,
+                                spellChecker: false,
+                                minHeight: '250px',
+                                renderingConfig: { codeSyntaxHighlighting: false }
+                            });
+                        } else {
+                            reformulationMDE.value(finalText);
+                            // Petit délai pour s'assurer que le refresh se fait après l'affichage de la modale
+                            setTimeout(() => {
+                                reformulationMDE.codemirror.refresh();
+                            }, 50);
+                        }
+                    }
+                } finally {
+                    cmWrapper.style.opacity = originalOpacity || '1';
+                    cmWrapper.style.pointerEvents = 'auto';
+                    if (spinnerOverlay) spinnerOverlay.remove();
+                }
+            }
+
+            // AJOUT: Gestion des événements de la modale de reformulation
+            closeReformulationBtn.addEventListener('click', () => {
+                reformulationModal.classList.add('hidden');
+                currentEditorInstance = null;
+            });
+            cancelReformulationBtn.addEventListener('click', () => {
+                reformulationModal.classList.add('hidden');
+                currentEditorInstance = null;
+            });
+            applyReformulationBtn.addEventListener('click', () => {
+                if (currentEditorInstance && reformulationMDE) {
+                    // MODIFICATION: On récupère la valeur depuis l'éditeur EasyMDE
+                    currentEditorInstance.value(reformulationMDE.value());
+                }
+                reformulationModal.classList.add('hidden');
+                currentEditorInstance = null;
+                showToast('Reformulation appliquée', 'success');
+            });
+
+            function createPillar(title = 'Nouveau Pilier', colorSet, subsections = [], isClosed = false) {
+                const pillarDiv = document.createElement('div');
+                pillarDiv.className = 'pillar-card p-5 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out';
+                pillarDiv.classList.add(colorSet.bg, colorSet.text);
+                pillarDiv.style.borderColor = colorSet.border;
+                pillarDiv.style.setProperty('--print-color', colorSet.printText);
+                pillarDiv.dataset.colorSet = JSON.stringify(colorSet);
+
+                const header = document.createElement('div');
+                header.className = 'flex flex-col sm:flex-row justify-between sm:items-center mb-4';
+                header.innerHTML = `
+                    <div class="flex items-center space-x-1 flex-grow w-full">
+                         <button class="drag-handle-pillar no-print text-current hover:opacity-70 p-1 rounded-full transition-opacity" tabindex="-1">
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor"><path d="M4 6H20M4 12H20M4 18H20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        </button>
+                        <div class="flex items-center space-x-1 flex-grow w-full cursor-pointer toggle-pillar-btn">
+                            <button class="toggle-btn no-print text-current hover:opacity-70 p-1 rounded-full transition-opacity" tabindex="-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 toggle-icon ${isClosed ? 'is-closed' : ''}" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                            </button>
+                            <input type="text" class="pillar-title text-2xl font-semibold bg-transparent border-b-2 border-transparent ${colorSet.ring} focus:border-current focus:ring-0 focus:outline-none p-1 -ml-1 rounded-md w-full" value="${title}" placeholder="Titre (Titre niv. 2)">
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 mt-3 sm:mt-0 no-print flex-shrink-0 ml-4">
+                        <button class="suggest-sections-btn py-1 px-3 bg-white bg-opacity-80 hover:bg-opacity-100 text-sm font-medium rounded-md shadow-sm transition-all flex items-center space-x-1.5">
+                            <span class="gemini-btn-text">✨ Suggérer</span><span class="gemini-spinner hidden"></span>
+                        </button>
+                        <button class="add-subsection-btn py-1 px-3 bg-white bg-opacity-80 hover:bg-opacity-100 text-sm font-medium rounded-md shadow-sm transition-all">Ajouter Section (Titre niv. 3)</button>
+                        <button class="delete-pillar-btn py-1 px-3 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-md shadow-sm transition-all">Supprimer</button>
+                    </div>
+                `;
+                
+                const subsectionsContainer = document.createElement('div');
+                subsectionsContainer.className = `subsections-container space-y-4 ml-0 md:ml-4 collapsible-content ${isClosed ? 'is-closed' : ''}`;
+                subsections.forEach(sub => subsectionsContainer.appendChild(createSubsection(sub.title, sub.content, colorSet, sub.isClosed || false)));
+                pillarDiv.appendChild(header);
+                pillarDiv.appendChild(subsectionsContainer);
+                new Sortable(subsectionsContainer, { animation: 150, handle: '.drag-handle-sub', ghostClass: 'sortable-ghost' });
+                return pillarDiv;
+            }
+
+            async function handleSuggestSections(btn) {
+                const pillarCard = btn.closest('.pillar-card');
+                const pillarTitle = pillarCard.querySelector('.pillar-title').value;
+                const mainTitle = mainTitleInput.value;
+                const btnText = btn.querySelector('.gemini-btn-text');
+                const spinner = btn.querySelector('.gemini-spinner');
+
+                btn.disabled = true; btnText.textContent = "Génération..."; spinner.classList.remove('hidden');
+                try {
+                    const jsonResponse = await callGemini(
+                        "Tu es un assistant de conception de prompts. Suggère des sous-sections pertinentes.",
+                        `Titre: "${mainTitle}"\nPilier: "${pillarTitle}"\nSuggère 3 à 5 titres de sous-sections.`,
+                        { type: "OBJECT", properties: { "suggestions": { "type": "ARRAY", "items": { "type": "STRING" } } }, required: ["suggestions"] }
+                    );
+                    if (!jsonResponse) return;
+                    const data = JSON.parse(jsonResponse);
+                    if (data.suggestions) {
+                        const subContainer = pillarCard.querySelector('.subsections-container');
+                        const colorSet = JSON.parse(pillarCard.dataset.colorSet);
+                        data.suggestions.forEach(title => subContainer.appendChild(createSubsection(title, '', colorSet, true)));
+                        const content = pillarCard.querySelector('.subsections-container');
+                        const icon = pillarCard.querySelector('.toggle-pillar-btn .toggle-icon');
+                        content.classList.remove('is-closed'); icon.classList.remove('is-closed');
+                    }
+                } catch(e) { console.error(e); showToast("Erreur parsing JSON", "error"); } 
+                finally { btn.disabled = false; btnText.textContent = "✨ Suggérer"; spinner.classList.add('hidden'); }
+            }
+
+            // --- Event Handlers ---
+            function handleContainerClick(e) {
+                if (e.target.closest('.drag-handle-pillar') || e.target.closest('.drag-handle-sub')) { e.stopPropagation(); return; }
+                
+                const togglePillarBtn = e.target.closest('.toggle-pillar-btn');
+                if (togglePillarBtn && !e.target.matches('.pillar-title')) {
+                     const content = togglePillarBtn.closest('.pillar-card').querySelector('.subsections-container');
+                     content.classList.toggle('is-closed');
+                     togglePillarBtn.querySelector('.toggle-icon').classList.toggle('is-closed');
+                     return;
+                }
+                const toggleSubBtn = e.target.closest('.toggle-subsection-btn');
+                if (toggleSubBtn && !e.target.matches('.subsection-title')) {
+                     const content = toggleSubBtn.closest('.subsection-card').querySelector('.subsection-content-wrapper');
+                     content.classList.toggle('is-closed');
+                     toggleSubBtn.querySelector('.toggle-icon').classList.toggle('is-closed');
+                     return;
+                }
+                const suggestBtn = e.target.closest('.suggest-sections-btn');
+                if (suggestBtn) { handleSuggestSections(suggestBtn); return; }
+
+                const addSubBtn = e.target.closest('.add-subsection-btn');
+                if (addSubBtn) {
+                    const pillarCard = e.target.closest('.pillar-card');
+                    const newSub = createSubsection('Nouvelle Sous-section', '', JSON.parse(pillarCard.dataset.colorSet), false);
+                    pillarCard.querySelector('.subsections-container').appendChild(newSub);
+                    newSub.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => mdeInstances.get(newSub.querySelector('textarea').id)?.codemirror.focus(), 500);
+                    return;
+                }
+                const deleteSubBtn = e.target.closest('.delete-subsection-btn');
+                if (deleteSubBtn) {
+                    const card = deleteSubBtn.closest('.subsection-card');
+                    const mde = mdeInstances.get(card.querySelector('textarea').id);
+                    if(mde) { mde.toTextArea(); mdeInstances.delete(card.querySelector('textarea').id); }
+                    card.remove(); return;
+                }
+                const deletePillarBtn = e.target.closest('.delete-pillar-btn');
+                if (deletePillarBtn) {
+                    const card = deletePillarBtn.closest('.pillar-card');
+                    card.querySelectorAll('textarea').forEach(t => { 
+                        const mde = mdeInstances.get(t.id); 
+                        if(mde) { mde.toTextArea(); mdeInstances.delete(t.id); }
+                    });
+                    card.remove(); return;
+                }
+            }
+
+            pillarsContainer.addEventListener('click', handleContainerClick);
+            addPillarBtn.addEventListener('click', () => {
+                const newPillar = createPillar('Nouveau Pilier', getNextColorSet(), [{ title: 'Nouvelle Sous-section', content: '', isClosed: false }], false);
+                pillarsContainer.appendChild(newPillar);
+                newPillar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+
+            // --- Export/Import/Analyse ---
+            function generateMarkdown() {
+                let md = `# ${mainTitleInput.value || 'Titre (Titre niv. 1)'}\n\n`;
+                pillarsContainer.querySelectorAll('.pillar-card').forEach(pillar => {
+                    md += `## ${pillar.querySelector('.pillar-title').value}\n\n`;
+                    pillar.querySelectorAll('.subsection-card').forEach(sub => {
+                        md += `### ${sub.querySelector('.subsection-title').value}\n\n`;
+                        const mde = mdeInstances.get(sub.querySelector('textarea').id);
+                        md += `${mde ? mde.value() : sub.querySelector('textarea').value}\n\n`;
+                    });
+                });
+                return md.trim();
+            }
+
+            function getDataAsObject() {
+                const data = { mainTitle: mainTitleInput.value, pillars: [] };
+                pillarsContainer.querySelectorAll('.pillar-card').forEach(pillar => {
+                    const pData = {
+                        title: pillar.querySelector('.pillar-title').value,
+                        colorSet: JSON.parse(pillar.dataset.colorSet),
+                        isClosed: pillar.querySelector('.subsections-container').classList.contains('is-closed'),
+                        subsections: []
+                    };
+                    pillar.querySelectorAll('.subsection-card').forEach(sub => {
+                        const mde = mdeInstances.get(sub.querySelector('textarea').id);
+                        pData.subsections.push({
+                            title: sub.querySelector('.subsection-title').value,
+                            content: mde ? mde.value() : sub.querySelector('textarea').value,
+                            isClosed: sub.querySelector('.subsection-content-wrapper').classList.contains('is-closed')
+                        });
+                    });
+                    data.pillars.push(pData);
+                });
+                return data;
+            }
+
+            function rebuildUi(data) {
+                pillarsContainer.innerHTML = ''; mdeInstances.clear(); currentColorIndex = 0;
+                mainTitleInput.value = data.mainTitle || 'Mon Gem Custom';
+                if (data.pillars) data.pillars.forEach(p => {
+                    const color = p.colorSet || getNextColorSet();
+                    const subs = p.subsections || [{ title: 'Nouvelle Sous-section', content: '', isClosed: false }];
+                    pillarsContainer.appendChild(createPillar(p.title, color, subs, p.isClosed));
+                });
+            }
+
+            function loadDefaults() {
+                rebuildUi({
+                    mainTitle: 'Mon Gem Custom',
+                    pillars: [
+                        { title: 'Rôle et Objectif', isClosed: false, subsections: [ { title: 'Rôle principal', content: 'Tu es un...', isClosed: true }, { title: 'Public cible', content: 'Tu t\'adresses à...', isClosed: true } ] },
+                        { title: 'Règles et Contraintes', isClosed: false, subsections: [ { title: 'Interdictions', content: 'Ne **jamais**...', isClosed: true } ] }
+                    ]
+                });
+            }
+
+            exportMdBtn.addEventListener('click', () => {
+                markdownOutput.textContent = generateMarkdown();
+                modal.classList.remove('hidden');
+            });
+            closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+            copyMdBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(markdownOutput.textContent).then(() => showToast('Copié !', 'success'));
+            });
+
+            exportPdfBtn.addEventListener('click', () => window.print());
+
+            exportJsonBtn.addEventListener('click', () => {
+                const blob = new Blob([JSON.stringify(getDataAsObject(), null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `${(mainTitleInput.value || 'config').replace(/\s+/g, '-').toLowerCase()}_${getTimestamp()}.json`;
+                a.click();
+            });
+
+            importJsonBtn.addEventListener('click', () => jsonFileInput.click());
+            jsonFileInput.addEventListener('change', (e) => {
+                const r = new FileReader();
+                r.onload = (ev) => { try { rebuildUi(JSON.parse(ev.target.result)); } catch(err) { showToast("JSON invalide", "error"); } };
+                r.readAsText(e.target.files[0]); e.target.value = null;
+            });
+
+            analyzeGeminiBtn.addEventListener('click', async () => {
+                analysisModal.classList.remove('hidden'); analysisLoading.classList.remove('hidden'); analysisOutput.classList.add('hidden');
+                copyAnalysisBtn.disabled = true;
+                const md = generateMarkdown();
+                const res = await callGemini("Tu es un expert en prompt engineering. Analyse les instructions.", `Analyse ceci:\n\n${md}`);
+                analysisLoading.classList.add('hidden');
+                if(res) {
+                    analysisOutput.textContent = res; analysisOutput.classList.remove('hidden'); copyAnalysisBtn.disabled = false;
+                } else {
+                    analysisModal.classList.add('hidden');
+                }
+            });
+            document.getElementById('close-analysis-modal-btn').addEventListener('click', () => analysisModal.classList.add('hidden'));
+            copyAnalysisBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(analysisOutput.textContent).then(() => showToast('Copié !', 'success'));
+            });
+
+            loadDefaults();
+            new Sortable(pillarsContainer, { animation: 150, handle: '.drag-handle-pillar', ghostClass: 'sortable-ghost' });
+        });
+    </script>
+</body>
+</html>

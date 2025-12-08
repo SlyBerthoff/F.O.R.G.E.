@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurateur de Gem Custom v3</title>
+    <title>Configurateur de Gem Custom v3.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
     <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
@@ -31,15 +31,16 @@
                     <span class="font-bold italic mr-2 text-xs">Double Emphase</span> <span class="text-gray-600">: Emphase critique, Alerte</span>
                 </div>
                 <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 border-l-4 border-l-gray-500 cursor-help" title="Règle critique ou phrase type">
-                    <span class="mr-2 font-semibold text-gray-500">Quote</span> <span class="text-gray-600">: Citation, Délimiteur de contexte (separation ordre/texte à analyser)</span>
+                    <span class="mr-2 font-semibold text-gray-500">Quote</span> <span class="text-gray-600">: Citation, Délimiteur de contexte</span>
                 </div>
                 <div class="flex items-center px-2 py-1 bg-gray-800 text-white rounded shadow-sm border border-gray-700 cursor-help" title="Commandes ou termes à reproduire exactement">
-                    <span class="font-mono mr-2 bg-gray-700 px-1 rounded">Code</span> <span class="text-gray-300">: Nom de variable, commande exacte, raccourci clavier, littéralité technique</span>
+                    <span class="font-mono mr-2 bg-gray-700 px-1 rounded">Code</span> <span class="text-gray-300">: Technique</span>
                 </div>
             </div>
         </div>
 
-        <main id="pillars-container" class="space-y-6"></main>
+        <main id="pillars-container" class="space-y-6 min-h-[100px]">
+            </main>
 
         <div class="mt-8 text-center no-print">
             <button id="add-pillar-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
@@ -62,10 +63,10 @@
                 <div class="h-8 w-px bg-gray-300 mx-2"></div>
                 
                 <button id="export-json-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-5 rounded-lg shadow">
-                    JSON Local (Export)
+                    JSON (Export)
                 </button>
                 <button id="import-json-btn" class="bg-yellow-500 hover:bg-yellow-600 text-gray-800 font-medium py-2 px-5 rounded-lg shadow">
-                    JSON Local (Import)
+                    JSON (Import)
                 </button>
                 
                 <div class="h-8 w-px bg-gray-300 mx-2"></div>
@@ -95,33 +96,63 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Google Client ID</label>
                     <input type="text" id="client-id-input" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="123...apps.googleusercontent.com">
-                    <p class="text-xs text-gray-500 mt-1">Nécessaire pour se connecter.</p>
                 </div>
-                
-                <div class="border-t pt-4">
-                    <div id="auth-status-container" class="flex items-center justify-between">
-                        <span id="auth-status-text" class="text-sm font-medium text-red-500">Non connecté</span>
-                        <button id="google-login-btn" class="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1 px-3 rounded">
-                            Se connecter
-                        </button>
-                    </div>
+                <div class="border-t pt-4 flex items-center justify-between">
+                    <span id="auth-status-text" class="text-sm font-medium text-red-500">Non connecté</span>
+                    <button id="google-login-btn" class="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1 px-3 rounded">Connexion</button>
                 </div>
-
                 <div id="folder-section" class="border-t pt-4 opacity-50 pointer-events-none transition-opacity">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Dossier de sauvegarde</label>
                     <div class="flex items-center gap-2 mb-2">
-                        <div id="current-folder-name" class="flex-grow p-2 bg-gray-100 rounded text-sm text-gray-600 italic">Racine (par défaut)</div>
-                        <button id="change-folder-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-3 rounded">
-                            Choisir
-                        </button>
+                        <div id="current-folder-name" class="flex-grow p-2 bg-gray-100 rounded text-sm text-gray-600 italic">Racine</div>
+                        <button id="change-folder-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-3 rounded">Choisir</button>
                     </div>
-                    <p class="text-xs text-gray-500">Les sauvegardes iront dans ce dossier.</p>
                 </div>
             </div>
             <div class="p-4 border-t bg-gray-50 rounded-b-lg flex justify-end">
-                <button id="save-settings-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg">
-                    Enregistrer & Fermer
-                </button>
+                <button id="save-settings-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg">Fermer</button>
             </div>
         </div>
     </div>
+
+    <div id="folder-picker-modal" class="fixed inset-0 bg-gray-800 bg-opacity-90 flex items-center justify-center p-4 z-[60] hidden no-print">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md flex flex-col max-h-[70vh]">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="font-semibold text-gray-700">Choisir un dossier</h3>
+                <button id="close-folder-picker" class="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <div id="folder-list-container" class="flex-grow overflow-y-auto p-2 space-y-1"></div>
+            <div class="p-3 border-t bg-gray-50 rounded-b-lg text-center">
+                <button id="create-app-folder-btn" class="text-blue-600 text-sm hover:underline">+ Créer dossier "CustomGem Projects"</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="markdown-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">Markdown</h3>
+                <button id="close-md-modal-btn" class="text-gray-400 hover:text-gray-700">✕</button>
+            </div>
+            <div class="p-6 overflow-y-auto">
+                <pre id="markdown-output" class="bg-gray-50 p-4 rounded-md text-sm whitespace-pre-wrap"></pre>
+            </div>
+            <div class="p-4 border-t bg-gray-50 rounded-b-lg">
+                <button id="copy-md-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg">Copier</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="drive-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg flex flex-col max-h-[80vh]">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">Charger un fichier</h3>
+                <button id="close-drive-modal-btn" class="text-gray-400 hover:text-gray-700">✕</button>
+            </div>
+            <div id="drive-file-list" class="p-4 overflow-y-auto flex-grow bg-gray-50"></div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

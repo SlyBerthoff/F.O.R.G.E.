@@ -10,6 +10,12 @@ body {
 .easymde-container .CodeMirror { border: none; border-radius: 0 0 8px 8px; background-color: var(--easymde-bg, #FFFFFF); transition: background-color 0.3s ease; }
 .easymde-container .editor-toolbar { border: none; border-bottom: 1px dashed #cccccc; background-color: var(--easymde-bg, #FFFFFF); }
 
+/* TRUC VISUEL : Atténuer la syntaxe Markdown */
+.cm-formatting {
+    color: #cbd5e1 !important; /* Gris très clair (Tailwind slate-300) */
+    font-weight: normal !important;
+}
+
 /* UI Elements */
 .toggle-icon { transition: transform 0.2s; transform: rotate(90deg); }
 .toggle-icon.is-closed { transform: rotate(0deg); }

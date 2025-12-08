@@ -21,20 +21,20 @@
             <input type="text" id="main-title" class="text-4xl font-bold text-gray-800 bg-transparent border-b-2 border-transparent focus:border-gray-400 focus:ring-0 focus:outline-none w-full p-2 text-center" value="Mon Gem Custom" placeholder="Titre du projet">
             
             <div class="flex flex-wrap justify-center gap-3 mt-3 text-xs md:text-sm text-gray-700">
-                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Exemple : Je comprends que ce mot ou cette phrase est essentiel(le). Si tu mets une instruction en gras (ex: Ne résume pas), je la traite comme une contrainte stricte (hard constraint"). Si c'est un mot-clé, je m'assure qu'il est bien pris en compte dans ma réponse.">
+                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Mon Action : Je comprends que ce mot ou cette phrase est essentiel(le). Si tu mets une instruction en gras (ex: Ne résume pas), je la traite comme une contrainte stricte (''-''hard constraint''-''). Si c'est un mot-clé, je m'assure qu'il est bien pris en compte dans ma réponse.">
                     <span class="font-bold mr-2">Gras</span> <span class="text-gray-600">: Priorité absolue, Point Focal</span>
                 </div>
-                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Exemple : mode atelier">
+                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Mon action : Je le traite avec une ''voix'' différente. Cela peut m'indiquer un ton particulier à adopter ou me signaler que ce terme ne doit pas être pris au sens littéral standard.">
                     <span class="italic mr-2">Italique</span> <span class="text-gray-600">: Nuance, Titre, Autre langue, Définition</span>
                 </div>
-                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Règle absolue non négociable">
+                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Mon action : Je m'arrête dessus pour m'assurer que je ne rate surtout pas cette condition. C'est l'équivalent textuel de lever la voix ou de souligner deux fois en rouge. C'est souvent utilisé pour les interdictions majeures (ex: N'invente jamais de faits)">
                     <span class="font-bold italic mr-2 text-xs">Double Emphase</span> <span class="text-gray-600">: Emphase critique, Alerte</span>
                 </div>
-                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 border-l-4 border-l-gray-500 cursor-help" title="Règle critique ou phrase type">
+                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 border-l-4 border-l-gray-500 cursor-help" title="Cela me dit : ''Ceci n'est pas une instruction pour toi, c'est le texte sur lequel tu dois travailler'' Mon action : Je sépare ce bloc de tes consignes. Si tu me demandes ''Résume ceci''- : je vais résumer tout ce qui se trouve dans le bloc de citation (>). Cela évite que je confonde tes ordres avec le texte à analyser.">
                     <span class="mr-2 font-semibold text-gray-500">Quote</span> <span class="text-gray-600">: Citation, Délimiteur de contexte</span>
                 </div>
-                <div class="flex items-center px-2 py-1 bg-gray-800 text-white rounded shadow-sm border border-gray-700 cursor-help" title="Commandes ou termes à reproduire exactement">
-                    <span class="font-mono mr-2 bg-gray-700 px-1 rounded">Code</span> <span class="text-gray-300">: Technique</span>
+                <div class="flex items-center px-2 py-1 bg-gray-800 text-white rounded shadow-sm border border-gray-700 cursor-help" title="Mon action : Je ne cherche pas à traduire, corriger ou interpréter le sens grammatical de ce qui est entre les accents graves. Je comprends que c'est un nom de variable, une commande exacte, un raccourci clavier ou un bout de code informatique qui doit rester intact.">
+                    <span class="font-mono mr-2 bg-gray-700 px-1 rounded">Code</span> <span class="text-gray-300">: Littéralité Technique</span>
                 </div>
             </div>
         </div>

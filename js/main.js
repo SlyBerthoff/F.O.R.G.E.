@@ -6,7 +6,6 @@ import * as Drive from './drive.js';
 
 // ============================================================
 // CONFIGURATION GOOGLE DRIVE
-// Collez ici votre Client ID récupéré depuis Google Cloud Console
 const GOOGLE_CLIENT_ID = "912917090028-6jmainstltc8q129h6hlsa026ik2boei.apps.googleusercontent.com"; 
 // ============================================================
 
@@ -17,21 +16,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!pillarsContainer) throw new Error("Container principal 'pillars-container' introuvable.");
 
-        // --- Init Drive Automatique ---
+        // --- Init Drive ---
         if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID.includes("googleusercontent.com")) {
             localStorage.setItem('google_client_id', GOOGLE_CLIENT_ID);
             Drive.initTokenClient(GOOGLE_CLIENT_ID);
         } else {
-            console.warn("Google Client ID non configuré ou invalide dans js/main.js");
-            showToast("Attention: Client ID manquant dans le code", "error");
+            console.warn("Client ID manquant.");
         }
 
-        // --- Helpers d'attachement d'événements ---
+        // --- Helpers ---
         function attach(id, event, handler) {
             const el = document.getElementById(id);
             if (el) el.addEventListener(event, handler);
-            else console.warn(`Element introuvable: #${id}`);
         }
+
+        // --- GESTION DU LAYOUT (Légende Gauche/Droite) ---
+        const body = document.body;
+        const sidebar = document.getElementById('legend-sidebar');
+        const toggleLegendBtn = document.getElementById('toggle-legend-pos-btn');
+        const legendIcon = document.getElementById('legend-pos-icon');
+        let isLeft = true; // Défaut
+
+        attach('toggle-legend-pos-btn', 'click', () => {
+            isLeft = !isLeft;
+            if (isLeft) {
+                body.classList.remove('legend-right');
+                body.classList.add('legend-left');
+                sidebar.style.left = '0';
+                sidebar.style.right = 'auto';
+                sidebar.style.borderRightWidth = '1px';
+                sidebar.style.borderLeftWidth = '0';
+                legendIcon.textContent = "⬅";
+            } else {
+                body.classList.remove('legend-left');
+                body.classList.add('legend-right');
+                sidebar.style.left = 'auto';
+                sidebar.style.right = '0';
+                sidebar.style.borderLeftWidth = '1px';
+                sidebar.style.borderRightWidth = '0';
+                legendIcon.textContent = "➡";
+            }
+        });
 
         // --- Boutons Principaux ---
         attach('add-pillar-btn', 'click', () => {
@@ -40,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             p.scrollIntoView({behavior:'smooth'});
         });
 
-        // --- Délégation pour Piliers/Sections ---
+        // --- Délégation (Piliers/Sections) ---
         pillarsContainer.addEventListener('click', (e) => {
             if (e.target.closest('.drag-handle-pillar') || e.target.closest('.drag-handle-sub')) return;
 
@@ -95,22 +120,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const settingsModal = document.getElementById('settings-modal');
         const authStatusText = document.getElementById('auth-status-text');
         const folderSection = document.getElementById('folder-section');
+        const loginBtn = document.getElementById('google-login-btn');
 
-        // Mise à jour UI connexion
         document.addEventListener('drive-connected', () => {
             if(authStatusText) {
                 authStatusText.textContent = "Connecté ✅";
                 authStatusText.className = "text-sm font-bold text-green-600";
             }
             if(folderSection) folderSection.classList.remove('opacity-50', 'pointer-events-none');
-            
-            // Changer le texte du bouton aussi pour faire propre
-            const loginBtn = document.getElementById('google-login-btn');
             if(loginBtn) {
                 loginBtn.textContent = "Compte actif";
-                loginBtn.classList.add('bg-green-600', 'hover:bg-green-700');
-                loginBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-                loginBtn.disabled = true; // Optionnel : empêcher le re-clic
+                loginBtn.classList.replace('bg-blue-600', 'bg-green-600');
+                loginBtn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
+                loginBtn.disabled = true;
             }
         });
 
@@ -123,12 +145,11 @@ document.addEventListener('DOMContentLoaded', () => {
         attach('save-settings-btn', 'click', () => settingsModal.classList.add('hidden'));
 
         attach('google-login-btn', 'click', () => {
-            // Utilisation directe de la constante
             if(GOOGLE_CLIENT_ID) {
                 Drive.initTokenClient(GOOGLE_CLIENT_ID);
                 Drive.login();
             } else {
-                showToast("Erreur: Client ID non configuré dans le code", "error");
+                showToast("Client ID manquant", "error");
             }
         });
 
@@ -143,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
         attach('change-folder-btn', 'click', async () => {
             folderModal.classList.remove('hidden');
             folderList.innerHTML = '<p class="text-center text-gray-500 py-4">Chargement...</p>';
-            
             const folders = await Drive.listFolders();
             folderList.innerHTML = '';
             
@@ -176,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(f) { selectFolder(f.id, f.name); showToast("Dossier créé !", "success"); }
         });
 
-        // --- Actions Footer ---
+        // --- Actions Footer (Devenus Header) ---
         attach('save-drive-btn', 'click', () => {
             const data = getDataAsObject();
             const safeTitle = (mainTitleInput.value || 'projet').replace(/[^a-z0-9]/gi, '-').toLowerCase();
@@ -221,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const driveModal = document.getElementById('drive-modal');
         const driveList = document.getElementById('drive-file-list');
         attach('load-drive-btn', 'click', async () => {
-            if(!Drive.isConnected()) { showToast("Veuillez vous connecter dans les paramètres", "error"); return; }
+            if(!Drive.isConnected()) { showToast("Veuillez vous connecter", "error"); return; }
             driveModal.classList.remove('hidden');
             driveList.innerHTML = '<p class="text-center text-gray-500">Chargement...</p>';
             const files = await Drive.listJsonFiles();
@@ -239,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         attach('close-drive-modal-btn', 'click', () => driveModal.classList.add('hidden'));
 
-        // --- Helpers internes ---
+        // --- Helpers ---
         function getDataAsObject() {
             return {
                 mainTitle: mainTitleInput.value,
@@ -265,12 +285,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Init Default
         new Sortable(pillarsContainer, { animation: 150, handle: '.drag-handle-pillar', ghostClass: 'sortable-ghost' });
         rebuildUi({mainTitle: "Mon Gem Custom", pillars: [{title:"Contexte", subsections:[{title:"Rôle", content:""}]}]});
 
     } catch (err) {
         console.error("FATAL ERROR in Main:", err);
-        document.body.innerHTML += `<div style="position:fixed;top:0;left:0;background:red;color:white;padding:10px;">Erreur JS: ${err.message}</div>`;
     }
 });

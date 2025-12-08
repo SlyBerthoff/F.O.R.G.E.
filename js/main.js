@@ -4,6 +4,12 @@ import { createPillar, createSubsection } from './ui.js';
 import { showToast, getTimestamp } from './utils.js';
 import * as Drive from './drive.js';
 
+// ============================================================
+// CONFIGURATION GOOGLE DRIVE
+// Collez ici votre Client ID récupéré depuis Google Cloud Console
+const GOOGLE_CLIENT_ID = "912917090028-6jmainstltc8q129h6hlsa026ik2boei.apps.googleusercontent.com"; 
+// ============================================================
+
 document.addEventListener('DOMContentLoaded', () => {
     try {
         const pillarsContainer = document.getElementById('pillars-container');
@@ -11,14 +17,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!pillarsContainer) throw new Error("Container principal 'pillars-container' introuvable.");
 
-        // --- Init Drive ---
-        const savedClientId = localStorage.getItem('google_client_id');
-        if (savedClientId) {
-            // Lancer l'init avec le mécanisme de retry de drive.js
-            Drive.initTokenClient(savedClientId);
+        // --- Init Drive Automatique ---
+        if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID.includes("googleusercontent.com")) {
+            localStorage.setItem('google_client_id', GOOGLE_CLIENT_ID);
+            Drive.initTokenClient(GOOGLE_CLIENT_ID);
+        } else {
+            console.warn("Google Client ID non configuré ou invalide dans js/main.js");
+            showToast("Attention: Client ID manquant dans le code", "error");
         }
 
-        // --- Helpers d'attachement d'événements (Anti-Crash) ---
+        // --- Helpers d'attachement d'événements ---
         function attach(id, event, handler) {
             const el = document.getElementById(id);
             if (el) el.addEventListener(event, handler);
@@ -92,16 +100,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('drive-connected', () => {
             if(authStatusText) {
                 authStatusText.textContent = "Connecté ✅";
-                authStatusText.className = "text-sm font-medium text-green-600";
+                authStatusText.className = "text-sm font-bold text-green-600";
             }
             if(folderSection) folderSection.classList.remove('opacity-50', 'pointer-events-none');
+            
+            // Changer le texte du bouton aussi pour faire propre
+            const loginBtn = document.getElementById('google-login-btn');
+            if(loginBtn) {
+                loginBtn.textContent = "Compte actif";
+                loginBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                loginBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                loginBtn.disabled = true; // Optionnel : empêcher le re-clic
+            }
         });
 
         attach('settings-btn', 'click', () => {
             if(settingsModal) settingsModal.classList.remove('hidden');
-            const cidInput = document.getElementById('client-id-input');
-            if(cidInput) cidInput.value = localStorage.getItem('google_client_id') || '';
-            
             if (Drive.isConnected()) document.dispatchEvent(new CustomEvent('drive-connected'));
         });
 
@@ -109,13 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
         attach('save-settings-btn', 'click', () => settingsModal.classList.add('hidden'));
 
         attach('google-login-btn', 'click', () => {
-            const cid = document.getElementById('client-id-input').value.trim();
-            if(cid) {
-                localStorage.setItem('google_client_id', cid);
-                Drive.initTokenClient(cid);
+            // Utilisation directe de la constante
+            if(GOOGLE_CLIENT_ID) {
+                Drive.initTokenClient(GOOGLE_CLIENT_ID);
                 Drive.login();
             } else {
-                showToast("ID Client manquant", "error");
+                showToast("Erreur: Client ID non configuré dans le code", "error");
             }
         });
 
@@ -124,8 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const folderList = document.getElementById('folder-list-container');
         const currentFolderLabel = document.getElementById('current-folder-name');
         
-        // Restaurer dossier sauvegardé
-        let savedFolderName = localStorage.getItem('gem_drive_folder_name') || 'Racine';
+        let savedFolderName = localStorage.getItem('gem_drive_folder_name') || 'Racine (Mon Drive)';
         if(currentFolderLabel) currentFolderLabel.textContent = savedFolderName;
 
         attach('change-folder-btn', 'click', async () => {
@@ -135,11 +147,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const folders = await Drive.listFolders();
             folderList.innerHTML = '';
             
-            // Item Racine
             const rootDiv = document.createElement('div');
             rootDiv.className = "p-3 hover:bg-gray-100 cursor-pointer border-b flex items-center gap-2";
-            rootDiv.innerHTML = "📁 <b>Racine (Défaut)</b>";
-            rootDiv.onclick = () => selectFolder(null, "Racine");
+            rootDiv.innerHTML = "📁 <b>Racine (Mon Drive)</b>";
+            rootDiv.onclick = () => selectFolder(null, "Racine (Mon Drive)");
             folderList.appendChild(rootDiv);
 
             folders.forEach(f => {
@@ -210,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const driveModal = document.getElementById('drive-modal');
         const driveList = document.getElementById('drive-file-list');
         attach('load-drive-btn', 'click', async () => {
-            if(!Drive.isConnected()) { showToast("Non connecté", "error"); return; }
+            if(!Drive.isConnected()) { showToast("Veuillez vous connecter dans les paramètres", "error"); return; }
             driveModal.classList.remove('hidden');
             driveList.innerHTML = '<p class="text-center text-gray-500">Chargement...</p>';
             const files = await Drive.listJsonFiles();
@@ -260,7 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (err) {
         console.error("FATAL ERROR in Main:", err);
-        // Fallback visuel si tout plante
         document.body.innerHTML += `<div style="position:fixed;top:0;left:0;background:red;color:white;padding:10px;">Erreur JS: ${err.message}</div>`;
     }
 });

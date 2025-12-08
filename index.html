@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurateur de Gem Custom v3.1</title>
+    <title>Configurateur de Gem Custom v3.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
     <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
@@ -21,20 +21,20 @@
             <input type="text" id="main-title" class="text-4xl font-bold text-gray-800 bg-transparent border-b-2 border-transparent focus:border-gray-400 focus:ring-0 focus:outline-none w-full p-2 text-center" value="Mon Gem Custom" placeholder="Titre du projet">
             
             <div class="flex flex-wrap justify-center gap-3 mt-3 text-xs md:text-sm text-gray-700">
-                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Mon Action : Je comprends que ce mot ou cette phrase est essentiel(le). Si tu mets une instruction en gras (ex: Ne résume pas), je la traite comme une contrainte stricte (''-''hard constraint''-''). Si c'est un mot-clé, je m'assure qu'il est bien pris en compte dans ma réponse.">
-                    <span class="font-bold mr-2">Gras</span> <span class="text-gray-600">: Priorité absolue, Point Focal</span>
+                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Exemple : le ton">
+                    <span class="font-bold mr-2">Gras</span> <span class="text-gray-600">: Priorité, Point Focal, Contrainte</span>
                 </div>
-                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Mon action : Je le traite avec une ''voix'' différente. Cela peut m'indiquer un ton particulier à adopter ou me signaler que ce terme ne doit pas être pris au sens littéral standard.">
+                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Exemple : mode atelier">
                     <span class="italic mr-2">Italique</span> <span class="text-gray-600">: Nuance, Titre, Autre langue, Définition</span>
                 </div>
-                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Mon action : Je m'arrête dessus pour m'assurer que je ne rate surtout pas cette condition. C'est l'équivalent textuel de lever la voix ou de souligner deux fois en rouge. C'est souvent utilisé pour les interdictions majeures (ex: N'invente jamais de faits)">
+                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Règle absolue non négociable">
                     <span class="font-bold italic mr-2 text-xs">Double Emphase</span> <span class="text-gray-600">: Emphase critique, Alerte</span>
                 </div>
-                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 border-l-4 border-l-gray-500 cursor-help" title="Cela me dit : ''Ceci n'est pas une instruction pour toi, c'est le texte sur lequel tu dois travailler'' Mon action : Je sépare ce bloc de tes consignes. Si tu me demandes ''Résume ceci''- : je vais résumer tout ce qui se trouve dans le bloc de citation (>). Cela évite que je confonde tes ordres avec le texte à analyser.">
+                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 border-l-4 border-l-gray-500 cursor-help" title="Règle critique ou phrase type">
                     <span class="mr-2 font-semibold text-gray-500">Quote</span> <span class="text-gray-600">: Citation, Délimiteur de contexte</span>
                 </div>
-                <div class="flex items-center px-2 py-1 bg-gray-800 text-white rounded shadow-sm border border-gray-700 cursor-help" title="Mon action : Je ne cherche pas à traduire, corriger ou interpréter le sens grammatical de ce qui est entre les accents graves. Je comprends que c'est un nom de variable, une commande exacte, un raccourci clavier ou un bout de code informatique qui doit rester intact.">
-                    <span class="font-mono mr-2 bg-gray-700 px-1 rounded">Code</span> <span class="text-gray-300">: Littéralité Technique</span>
+                <div class="flex items-center px-2 py-1 bg-gray-800 text-white rounded shadow-sm border border-gray-700 cursor-help" title="Commandes ou termes à reproduire exactement">
+                    <span class="font-mono mr-2 bg-gray-700 px-1 rounded">Code</span> <span class="text-gray-300">: Technique</span>
                 </div>
             </div>
         </div>
@@ -89,24 +89,29 @@
     <div id="settings-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-md flex flex-col">
             <div class="flex justify-between items-center p-4 border-b">
-                <h3 class="text-xl font-semibold">Configuration Drive</h3>
+                <h3 class="text-xl font-semibold">Paramètres Google Drive</h3>
                 <button id="close-settings-btn" class="text-gray-400 hover:text-gray-700">✕</button>
             </div>
             <div class="p-6 space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Google Client ID</label>
-                    <input type="text" id="client-id-input" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="123...apps.googleusercontent.com">
-                </div>
-                <div class="border-t pt-4 flex items-center justify-between">
-                    <span id="auth-status-text" class="text-sm font-medium text-red-500">Non connecté</span>
-                    <button id="google-login-btn" class="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1 px-3 rounded">Connexion</button>
-                </div>
-                <div id="folder-section" class="border-t pt-4 opacity-50 pointer-events-none transition-opacity">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Dossier de sauvegarde</label>
-                    <div class="flex items-center gap-2 mb-2">
-                        <div id="current-folder-name" class="flex-grow p-2 bg-gray-100 rounded text-sm text-gray-600 italic">Racine</div>
-                        <button id="change-folder-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-3 rounded">Choisir</button>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Compte Google</p>
+                        <span id="auth-status-text" class="text-sm text-red-500 font-bold">Non connecté</span>
                     </div>
+                    <button id="google-login-btn" class="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-4 rounded shadow transition">
+                        Se connecter
+                    </button>
+                </div>
+
+                <div id="folder-section" class="border-t pt-6 opacity-50 pointer-events-none transition-opacity">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Dossier de destination</label>
+                    <div class="flex items-center gap-2 mb-2">
+                        <div id="current-folder-name" class="flex-grow p-2 bg-gray-100 rounded text-sm text-gray-600 italic border border-gray-200">Racine (Mon Drive)</div>
+                        <button id="change-folder-btn" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm py-2 px-3 rounded shadow-sm">
+                            Changer
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500">Tous vos fichiers JSON seront sauvegardés ici.</p>
                 </div>
             </div>
             <div class="p-4 border-t bg-gray-50 rounded-b-lg flex justify-end">

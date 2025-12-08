@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurateur de Gem Custom</title>
+    <title>Configurateur de Gem Custom v3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
     <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
@@ -18,74 +18,57 @@
     <div class="max-w-7xl mx-auto">
 
         <div class="sticky top-0 z-50 bg-gray-100 -mt-4 -mx-4 md:-mt-8 md:-mx-8 px-4 md:px-8 pt-4 md:pt-8 pb-4 border-b border-gray-300 shadow-md mb-8">
-            <input type="text" id="main-title" class="text-4xl font-bold text-gray-800 bg-transparent border-b-2 border-transparent focus:border-gray-400 focus:ring-0 focus:outline-none w-full p-2 text-center" value="Mon Gem Custom" placeholder="Titre (Titre niv. 1)">
+            <input type="text" id="main-title" class="text-4xl font-bold text-gray-800 bg-transparent border-b-2 border-transparent focus:border-gray-400 focus:ring-0 focus:outline-none w-full p-2 text-center" value="Mon Gem Custom" placeholder="Titre du projet">
             
             <div class="flex flex-wrap justify-center gap-3 mt-3 text-xs md:text-sm text-gray-700">
-                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Exemple : le ton">
-                    <span class="font-bold mr-2">Gras</span> <span class="text-gray-600">: Priorité, Point Focal, Contrainte</span>
-                </div>
-                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Exemple : mode atelier">
-                    <span class="italic mr-2">Italique</span> <span class="text-gray-600">: Nuance, Titre, Autre langue, Définition</span>
-                </div>
-                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 cursor-help" title="Règle absolue non négociable">
-                    <span class="font-bold italic mr-2 text-xs">Double Emphase</span> <span class="text-gray-600">: Emphase critique, Alerte</span>
-                </div>
-                <div class="flex items-center px-2 py-1 bg-white rounded shadow-sm border border-gray-200 border-l-4 border-l-gray-500 cursor-help" title="Règle critique ou phrase type">
-                    <span class="mr-2 font-semibold text-gray-500">Quote</span> <span class="text-gray-600">: Citation, Délimiteur de contexte</span>
-                </div>
-                <div class="flex items-center px-2 py-1 bg-gray-800 text-white rounded shadow-sm border border-gray-700 cursor-help" title="Commandes ou termes à reproduire exactement">
-                    <span class="font-mono mr-2 bg-gray-700 px-1 rounded">Code</span> <span class="text-gray-300">: Littéralité technique</span>
-                </div>
+                <div class="flex items-center px-2 py-1 bg-white border rounded"><span class="font-bold mr-2">Gras</span>: Priorité</div>
+                <div class="flex items-center px-2 py-1 bg-white border rounded"><span class="italic mr-2">Italique</span>: Nuance</div>
+                <div class="flex items-center px-2 py-1 bg-gray-800 text-white border rounded"><span class="font-mono mr-2">Code</span>: Technique</div>
             </div>
         </div>
 
-        <main id="pillars-container" class="space-y-6">
-            </main>
+        <main id="pillars-container" class="space-y-6"></main>
 
         <div class="mt-8 text-center no-print">
-            <button id="add-pillar-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
-                Ajouter un Pilier (Titre niv. 2)
+            <button id="add-pillar-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                Ajouter un Pilier
             </button>
         </div>
 
         <footer class="mt-12 pt-6 border-t border-gray-300 no-print">
             <h3 class="text-xl font-semibold text-gray-700 mb-4 text-center">Actions</h3>
             <div class="flex flex-wrap justify-center gap-4 items-center">
-                <button id="settings-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-3 rounded-lg shadow transition-colors" title="Configuration API">
-                    ⚙️
+                <button id="settings-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-3 rounded-lg shadow" title="Paramètres Drive">
+                    ⚙️ Paramètres
                 </button>
                 <div class="h-8 w-px bg-gray-300 mx-2"></div>
-                <button id="export-md-btn" class="bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-5 rounded-lg shadow transition-colors">
-                    Générer Markdown
-                </button>
-                <button id="export-pdf-btn" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-5 rounded-lg shadow transition-colors">
-                    Générer PDF
-                </button>
-                <div class="h-8 w-px bg-gray-300 mx-2"></div>
-                <button id="export-json-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-5 rounded-lg shadow transition-colors">
-                    JSON Local (Export)
-                </button>
-                <button id="import-json-btn" class="bg-yellow-500 hover:bg-yellow-600 text-gray-800 font-medium py-2 px-5 rounded-lg shadow transition-colors">
-                    JSON Local (Import)
-                </button>
-                <div class="h-8 w-px bg-gray-300 mx-2"></div>
-                <button id="save-drive-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg shadow transition-colors flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.01 1.485c2.082 0 3.754.025 4.57.52C18.977 3.45 20.306 6.36 20.3 7.64c.005.518-.096.727-.29 1.07l-6.42 11.23c-1.22 2.13-2.61 2.37-3.99 2.37-1.42 0-3.09-.43-4.25-2.45L2.26 14.4c-.6-.99-.59-2.22.02-3.23l2.67-4.66c.64-1.12 1.57-2.3 2.87-3.22.97-.68 2.65-1.78 4.19-1.805zM12 4.5c-1.51 0-2.82.78-3.79 1.9L6.5 9.17l4.7 8.16c.38.65.98 1.17 1.8 1.17.82 0 1.42-.52 1.8-1.17l3.89-6.73c.47-.81.25-1.74-.35-2.34l-3.3-3.3c-.6-.6-1.54-.84-2.39-.45L12 4.5z"/></svg>
-                    Sauver Drive
-                </button>
-                <button id="load-drive-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-5 rounded-lg shadow transition-colors flex items-center gap-2">
-                    Charger Drive
+                
+                <button id="export-md-btn" class="bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-5 rounded-lg shadow">
+                    Voir Markdown
                 </button>
                 
                 <div class="h-8 w-px bg-gray-300 mx-2"></div>
-                <button id="analyze-gemini-btn" class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-medium py-2 px-5 rounded-lg shadow transition-all flex items-center space-x-2">
-                    <span class="gemini-btn-text">✨ Analyser</span>
-                    <span class="gemini-spinner hidden"></span>
+                
+                <button id="export-json-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-5 rounded-lg shadow">
+                    JSON Local (Export)
                 </button>
+                <button id="import-json-btn" class="bg-yellow-500 hover:bg-yellow-600 text-gray-800 font-medium py-2 px-5 rounded-lg shadow">
+                    JSON Local (Import)
+                </button>
+                
+                <div class="h-8 w-px bg-gray-300 mx-2"></div>
+                
+                <button id="save-drive-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg shadow flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.01 1.485c2.082 0 3.754.025 4.57.52C18.977 3.45 20.306 6.36 20.3 7.64c.005.518-.096.727-.29 1.07l-6.42 11.23c-1.22 2.13-2.61 2.37-3.99 2.37-1.42 0-3.09-.43-4.25-2.45L2.26 14.4c-.6-.99-.59-2.22.02-3.23l2.67-4.66c.64-1.12 1.57-2.3 2.87-3.22.97-.68 2.65-1.78 4.19-1.805zM12 4.5c-1.51 0-2.82.78-3.79 1.9L6.5 9.17l4.7 8.16c.38.65.98 1.17 1.8 1.17.82 0 1.42-.52 1.8-1.17l3.89-6.73c.47-.81.25-1.74-.35-2.34l-3.3-3.3c-.6-.6-1.54-.84-2.39-.45L12 4.5z"/></svg>
+                    Sauver Drive
+                </button>
+                <button id="load-drive-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-5 rounded-lg shadow flex items-center gap-2">
+                    Charger Drive
+                </button>
+                
                 <input type="file" id="json-file-input" accept=".json" class="hidden">
             </div>
         </footer>
-
     </div>
 
     <div id="toast-container"></div>
@@ -93,66 +76,57 @@
     <div id="settings-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-md flex flex-col">
             <div class="flex justify-between items-center p-4 border-b">
-                <h3 class="text-xl font-semibold">Configuration</h3>
-                <button id="close-settings-btn" class="text-gray-400 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+                <h3 class="text-xl font-semibold">Configuration Drive</h3>
+                <button id="close-settings-btn" class="text-gray-400 hover:text-gray-700">✕</button>
             </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Clé API Gemini</label>
-                    <input type="password" id="api-key-input" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="AIzaSy...">
-                </div>
+            <div class="p-6 space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Google Client ID</label>
-                    <input type="text" id="client-id-input" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="123...apps.googleusercontent.com">
+                    <input type="text" id="client-id-input" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="123...apps.googleusercontent.com">
+                    <p class="text-xs text-gray-500 mt-1">Nécessaire pour se connecter.</p>
+                </div>
+                
+                <div class="border-t pt-4">
+                    <div id="auth-status-container" class="flex items-center justify-between">
+                        <span id="auth-status-text" class="text-sm font-medium text-red-500">Non connecté</span>
+                        <button id="google-login-btn" class="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1 px-3 rounded">
+                            Se connecter
+                        </button>
+                    </div>
+                </div>
+
+                <div id="folder-section" class="border-t pt-4 opacity-50 pointer-events-none transition-opacity">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Dossier de sauvegarde</label>
+                    <div class="flex items-center gap-2 mb-2">
+                        <div id="current-folder-name" class="flex-grow p-2 bg-gray-100 rounded text-sm text-gray-600 italic">Racine (par défaut)</div>
+                        <button id="change-folder-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-2 px-3 rounded">
+                            Choisir
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500">Les sauvegardes iront dans ce dossier.</p>
                 </div>
             </div>
             <div class="p-4 border-t bg-gray-50 rounded-b-lg flex justify-end">
-                <button id="save-settings-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    Enregistrer
+                <button id="save-settings-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg">
+                    Enregistrer & Fermer
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="drive-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg flex flex-col max-h-[80vh]">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h3 class="text-xl font-semibold">Fichiers sur Drive</h3>
-                <button id="close-drive-modal-btn" class="text-gray-400 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+    <div id="folder-picker-modal" class="fixed inset-0 bg-gray-800 bg-opacity-90 flex items-center justify-center p-4 z-[60] hidden no-print">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md flex flex-col max-h-[70vh]">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="font-semibold text-gray-700">Sélectionner un dossier</h3>
+                <button id="close-folder-picker" class="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <div id="folder-list-container" class="flex-grow overflow-y-auto p-2 space-y-1">
+                <p class="text-center text-gray-500 py-4">Chargement...</p>
+            </div>
+            <div class="p-3 border-t bg-gray-50 rounded-b-lg text-center">
+                <button id="create-app-folder-btn" class="text-blue-600 text-sm hover:underline">
+                    + Créer un dossier "CustomGem Projects"
                 </button>
-            </div>
-            <div id="drive-file-list" class="p-4 overflow-y-auto flex-grow bg-gray-50">
-                <p class="text-center text-gray-500">Chargement...</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="reformulation-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h3 class="text-xl font-semibold text-purple-700 flex items-center gap-2">
-                    <span class="text-2xl">✨</span> Suggestion de Reformulation
-                </h3>
-                <button id="close-reformulation-btn" class="text-gray-400 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-            </div>
-            <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50">
-                <div class="flex flex-col">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Texte Original</label>
-                    <div id="original-text-display" class="w-full h-64 p-3 border border-gray-300 rounded-md bg-gray-100 text-gray-600 overflow-y-auto text-sm whitespace-pre-wrap"></div>
-                </div>
-                <div class="flex flex-col">
-                    <label class="block text-sm font-bold text-purple-700 mb-2">Suggestion IA (Éditable)</label>
-                    <textarea id="suggested-text-display" class="w-full p-3 border border-purple-300 rounded-md bg-white text-gray-800 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea>
-                </div>
-            </div>
-            <div class="p-4 border-t bg-white rounded-b-lg flex justify-end space-x-3">
-                <button id="cancel-reformulation-btn" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Conserver l'original</button>
-                <button id="apply-reformulation-btn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 shadow-md transition-colors flex items-center gap-2">Tout remplacer</button>
             </div>
         </div>
     </div>
@@ -160,38 +134,25 @@
     <div id="markdown-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col">
             <div class="flex justify-between items-center p-4 border-b">
-                <h3 class="text-xl font-semibold">Instructions Markdown</h3>
-                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+                <h3 class="text-xl font-semibold">Markdown</h3>
+                <button id="close-md-modal-btn" class="text-gray-400 hover:text-gray-700">✕</button>
             </div>
             <div class="p-6 overflow-y-auto">
-                <pre id="markdown-output" class="bg-gray-50 p-4 rounded-md text-sm whitespace-pre-wrap word-wrap break-words"></pre>
+                <pre id="markdown-output" class="bg-gray-50 p-4 rounded-md text-sm whitespace-pre-wrap"></pre>
             </div>
             <div class="p-4 border-t bg-gray-50 rounded-b-lg">
-                <button id="copy-md-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">Copier</button>
+                <button id="copy-md-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg">Copier</button>
             </div>
         </div>
     </div>
 
-    <div id="analysis-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+    <div id="drive-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg flex flex-col max-h-[80vh]">
             <div class="flex justify-between items-center p-4 border-b">
-                <h3 class="text-xl font-semibold">✨ Analyse</h3>
-                <button id="close-analysis-modal-btn" class="text-gray-400 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+                <h3 class="text-xl font-semibold">Charger un fichier</h3>
+                <button id="close-drive-modal-btn" class="text-gray-400 hover:text-gray-700">✕</button>
             </div>
-            <div id="analysis-output-container" class="p-6 overflow-y-auto">
-                <div id="analysis-loading" class="text-center py-10">
-                    <div class="gemini-spinner mx-auto text-purple-600" style="width: 2rem; height: 2rem; border-width: 3px;"></div>
-                    <p class="mt-4 text-gray-600 font-medium">Analyse en cours...</p>
-                </div>
-                <pre id="analysis-output" class="bg-gray-50 p-4 rounded-md text-sm whitespace-pre-wrap word-wrap break-words hidden"></pre>
-            </div>
-            <div class="p-4 border-t bg-gray-50 rounded-b-lg">
-                <button id="copy-analysis-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" disabled>Copier</button>
-            </div>
+            <div id="drive-file-list" class="p-4 overflow-y-auto flex-grow bg-gray-50"></div>
         </div>
     </div>
 

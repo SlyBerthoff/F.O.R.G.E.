@@ -5,116 +5,35 @@ body {
     scroll-behavior: smooth;
 }
 
-/* Masquer la barre de statut de EasyMDE */
-.editor-statusbar {
-    display: none !important;
-}
+/* EasyMDE Tweaks */
+.editor-statusbar { display: none !important; }
+.easymde-container .CodeMirror { border: none; border-radius: 0 0 8px 8px; background-color: var(--easymde-bg, #FFFFFF); transition: background-color 0.3s ease; }
+.easymde-container .editor-toolbar { border: none; border-bottom: 1px dashed #cccccc; background-color: var(--easymde-bg, #FFFFFF); }
 
-/* Styles pour les boutons de déploiement/réduction */
-.toggle-icon {
-    transition: transform 0.3s ease-in-out;
-    transform: rotate(90deg);
-}
-.toggle-icon.is-closed {
-    transform: rotate(0deg);
-}
-.collapsible-content {
-    transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out, visibility 0s 0s;
-    max-height: 2000px;
-    overflow: hidden;
-    opacity: 1;
-    visibility: visible;
-}
-.collapsible-content.is-closed {
-    max-height: 0;
-    opacity: 0;
-    visibility: hidden;
-    transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out, visibility 0s 0.5s;
-}
+/* UI Elements */
+.toggle-icon { transition: transform 0.2s; transform: rotate(90deg); }
+.toggle-icon.is-closed { transform: rotate(0deg); }
 
-/* Styles pour le Drag-and-Drop */
-.drag-handle-pillar, .drag-handle-sub {
-    cursor: grab;
-    transition: opacity 0.2s ease;
-}
-.drag-handle-pillar:hover, .drag-handle-sub:hover {
-    opacity: 0.7;
-}
-.sortable-ghost {
-    opacity: 0.4;
-    background: #e0e7ff;
-    border: 2px dashed #a5b4fc;
-}
-.sortable-ghost .subsection-card {
-    background-color: #e0e7ff !important;
-}
+.collapsible-content { overflow: hidden; max-height: 5000px; transition: max-height 0.4s ease-in-out, opacity 0.4s; opacity: 1; }
+.collapsible-content.is-closed { max-height: 0; opacity: 0; }
 
-/* Styles pour le Spinner Gemini */
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-.gemini-spinner {
-    display: inline-block;
-    border: 2px solid rgba(0, 0, 0, 0.1);
-    border-left-color: currentColor;
-    border-radius: 50%;
-    width: 1em;
-    height: 1em;
-    animation: spin 0.8s linear infinite;
-}
+.drag-handle-pillar, .drag-handle-sub { cursor: grab; opacity: 0.5; }
+.drag-handle-pillar:hover, .drag-handle-sub:hover { opacity: 1; }
+.sortable-ghost { opacity: 0.4; background: #e0e7ff; border: 2px dashed #a5b4fc; }
 
-/* Toast Notifications */
-#toast-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.toast {
-    background: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-    animation: slideIn 0.3s ease-out forwards;
-    border-left: 4px solid #3b82f6;
-    max-width: 300px;
-}
+/* Toast */
+#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+.toast { background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-left: 4px solid #3b82f6; animation: slideIn 0.3s ease-out; }
 .toast.error { border-left-color: #ef4444; }
 .toast.success { border-left-color: #22c55e; }
-@keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-@keyframes fadeOut {
-    to { opacity: 0; transform: translateY(10px); }
-}
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(10px); } }
 
-/* Styles pour l'impression */
+/* Print Minimalist */
 @media print {
-    body { -webkit-print-color-adjust: exact; color-adjust: exact; }
     .no-print { display: none !important; }
-    .pillar-card { page-break-inside: avoid; box-shadow: none !important; border: 1px solid #e5e7eb; }
-    .subsection-card { page-break-inside: avoid; box-shadow: none; border-top: 1px dashed #e0e0e0; margin-top: 1rem; padding-top: 1rem; }
-    .subsection-card:first-child { border-top: none; margin-top: 0; padding-top: 0; }
-    input[type="text"] { border: none !important; padding: 1px; font-weight: bold; color: #000 !important; }
-    input[type="text"].pillar-title { font-size: 1.5rem; color: var(--print-color, #000) !important; }
-    input[type="text"].subsection-title { font-size: 1.25rem; }
-    input[type="text"]#main-title { font-size: 2rem; text-align: center; display: block; width: 100%; margin-bottom: 2rem; }
-    .easymde-container { display: none !important; }
-    .collapsible-content { max-height: none !important; opacity: 1 !important; visibility: visible !important; overflow: visible !important; }
-    .toggle-icon { display: none !important; }
-    .print-content { display: block !important; white-space: pre-wrap; word-wrap: break-word; padding: 8px; background-color: var(--print-bg-color, #fff) !important; border-radius: 4px; color: #1f2937; }
+    .pillar-card { border: 1px solid #ddd; box-shadow: none; break-inside: avoid; }
+    .easymde-container { display: none; }
+    .print-content { display: block; white-space: pre-wrap; font-size: 10pt; }
 }
 .print-content { display: none; }
-
-/* Styles EasyMDE Custom */
-.easymde-container .CodeMirror { border: none; border-radius: 0 0 8px 8px; background-color: var(--easymde-bg, #FFFFFF); transition: background-color 0.3s ease; }
-.easymde-container .editor-toolbar { border: none; border-bottom: 1px dashed #cccccc; background-color: var(--easymde-bg, #FFFFFF); transition: background-color 0.3s ease; }
-.easymde-container .editor-toolbar button { color: #374151; }
-.easymde-container .editor-toolbar button.active, .easymde-container .editor-toolbar button:hover { background: rgba(0,0,0,0.1); border-color: transparent; }

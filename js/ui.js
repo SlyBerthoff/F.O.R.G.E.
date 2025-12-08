@@ -32,16 +32,15 @@ export function createSubsection(title = 'Nouvelle Section', content = '', color
         const easyMDE = new EasyMDE({
             element: ta,
             initialValue: content,
-            // CONFIGURATION BARRE D'OUTILS MISE À JOUR
+            // CONFIGURATION BARRE D'OUTILS - SANS "SIDE-BY-SIDE"
             toolbar: [
                 'bold', 'italic', 
-                '|', // Séparateur
+                '|', 
                 'unordered-list', 'ordered-list', 
                 '|', 
                 'code', 'quote',
                 '|', 
-                'preview',       // Bouton "Œil" pour voir le rendu sans codes
-                'side-by-side'   // Bouton "Écran scindé"
+                'preview' // Seul le bouton "Aperçu" reste
             ],
             status: false,
             spellChecker: false,

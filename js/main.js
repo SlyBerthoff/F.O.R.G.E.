@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.addEventListener('drive-connected', () => {
             if(loginBtn && loginText) {
-                loginText.textContent = "Compte Connecté";
+                loginText.textContent = "Connecté";
                 loginBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
                 loginBtn.classList.add('bg-green-600', 'hover:bg-green-700');
             }
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         attach('close-folder-picker', 'click', () => document.getElementById('folder-picker-modal').classList.add('hidden'));
         attach('create-app-folder-btn', 'click', async () => {
-            const f = await Drive.createAppFolder("F.O.R.G.E. Projects");
+            const f = await Drive.createAppFolder("F.O.R.G.E. - Sauvegarde Projets");
             if(f) { selectFolder(f.id, f.name); showToast("Dossier créé !", "success"); }
         });
 

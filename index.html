@@ -1,178 +1,90 @@
-<!DOCTYPE html>
-<html lang="fr" class="h-full">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F.O.R.G.E. v6</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://apis.google.com/js/api.js" async defer></script>
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-        body.legend-left { padding-left: 280px; padding-right: 0; }
-        body.legend-right { padding-right: 280px; padding-left: 0; }
-        body, #legend-sidebar { transition: all 0.3s ease-in-out; }
-        @media (max-width: 1024px) {
-            body.legend-left, body.legend-right { padding: 0; }
-            #legend-sidebar { transform: translateX(-100%); z-index: 1000; }
-            #legend-sidebar.active { transform: translateX(0); }
-        }
-    </style>
-</head>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-<body class="legend-left">
+body {
+    font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
+}
 
-    <aside id="legend-sidebar" class="fixed top-0 bottom-0 w-[280px] border-r flex flex-col z-50 no-print shadow-xl" style="left: 0;">
-        
-        <div class="p-4 border-b border-gray-200 bg-gray-50/50 dark:bg-gray-800 dark:border-gray-700">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg">F</div>
-                <div>
-                    <h1 class="font-bold text-gray-800 dark:text-white leading-tight">F.O.R.G.E.</h1>
-                    <span class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">v6.0.0</span>
-                </div>
-            </div>
+/* EasyMDE Tweaks */
+.editor-statusbar { display: none !important; }
+.easymde-container .CodeMirror { border: none; border-radius: 0 0 8px 8px; background-color: var(--easymde-bg, #FFFFFF); transition: background-color 0.3s ease; }
+.easymde-container .editor-toolbar { border: none; border-bottom: 1px dashed #cccccc; background-color: var(--easymde-bg, #FFFFFF); }
 
-            <div class="space-y-2">
-                <button id="header-login-btn" class="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    <span id="login-status-text">Connexion Google</span>
-                </button>
-                <button id="header-folder-btn" disabled class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-400 border border-gray-200 rounded-md cursor-not-allowed transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
-                    <span id="header-folder-name" class="truncate max-w-[150px]">Dossier...</span>
-                </button>
-            </div>
-        </div>
+/* TRUC VISUEL : Atténuer la syntaxe Markdown */
+.cm-formatting {
+    color: #cbd5e1 !important; /* Gris très clair (Tailwind slate-300) */
+    font-weight: normal !important;
+}
 
-        <div class="flex-grow overflow-y-auto p-4 space-y-3 dark:bg-gray-900">
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Aide-Mémoire</h3>
-            
-            <div class="tooltip-btn p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 cursor-help transition-colors hover:border-blue-400" data-tooltip="Gras">
-                <span class="font-bold block text-gray-900 dark:text-gray-100">Gras</span>
-                <p class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Priorité, Point Focal.</p>
-            </div>
-            
-            <div class="tooltip-btn p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 cursor-help transition-colors hover:border-blue-400" data-tooltip="Italique">
-                <span class="italic block text-gray-900 dark:text-gray-100">Italique</span>
-                <p class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Nuance, Titre.</p>
-            </div>
+/* UI Elements */
+.toggle-icon { transition: transform 0.2s; transform: rotate(90deg); }
+.toggle-icon.is-closed { transform: rotate(0deg); }
 
-            <div class="tooltip-btn p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 cursor-help transition-colors hover:border-blue-400" data-tooltip="Double Emphase">
-                <span class="font-bold italic block text-gray-900 dark:text-gray-100">Double Emphase</span>
-                <p class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Alerte, Règle absolue.</p>
-            </div>
+.collapsible-content { overflow: hidden; max-height: 5000px; transition: max-height 0.4s ease-in-out, opacity 0.4s; opacity: 1; }
+.collapsible-content.is-closed { max-height: 0; opacity: 0; }
 
-            <div class="tooltip-btn p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 cursor-help border-l-4 border-l-gray-400 transition-colors hover:border-gray-500" data-tooltip="Quote">
-                <span class="font-semibold block text-gray-600 dark:text-gray-300">Quote</span>
-                <p class="text-gray-500 dark:text-gray-400 text-[10px] mt-1">Contexte.</p>
-            </div>
+.drag-handle-pillar, .drag-handle-sub { cursor: grab; opacity: 0.5; }
+.drag-handle-pillar:hover, .drag-handle-sub:hover { opacity: 1; }
+.sortable-ghost { opacity: 0.4; background: #e0e7ff; border: 2px dashed #a5b4fc; }
 
-            <div class="tooltip-btn p-3 bg-gray-800 dark:bg-black rounded border border-gray-700 cursor-help" data-tooltip="Code">
-                <span class="font-mono text-gray-200 text-xs bg-gray-700 px-1 rounded">Code</span>
-                <p class="text-gray-400 text-[10px] mt-1">Commande technique.</p>
-            </div>
-        </div>
+/* Toast */
+#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+.toast { background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-left: 4px solid #3b82f6; animation: slideIn 0.3s ease-out; }
+.toast.error { border-left-color: #ef4444; }
+.toast.success { border-left-color: #22c55e; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(10px); } }
 
-        <div class="p-4 border-t border-gray-200 bg-gray-50/50 dark:bg-gray-800 dark:border-gray-700 space-y-3">
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Outils</h3>
-            
-            <div class="grid grid-cols-2 gap-2">
-                
-                <button id="export-md-btn" class="col-span-2 flex items-center justify-center gap-2 p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-600 transition text-gray-700 dark:text-white">
-                    <span>📝 Markdown</span>
-                </button>
+/* Print Minimalist */
+@media print {
+    .no-print { display: none !important; }
+    .pillar-card { border: 1px solid #ddd; box-shadow: none; break-inside: avoid; }
+    .easymde-container { display: none; }
+    .print-content { display: block; white-space: pre-wrap; font-size: 10pt; }
+}
+.print-content { display: none; }
 
-                <button id="save-drive-btn" class="col-span-2 flex items-center justify-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded text-xs font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition">
-                    <span>☁️ Sauver Drive</span>
-                </button>
-
-                <button id="export-json-btn" class="flex items-center justify-center p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-xs hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-200" title="Export JSON Local">
-                    ⬇ JSON
-                </button>
-
-                <button id="import-json-btn" class="flex items-center justify-center p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-xs hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-200" title="Import JSON Local">
-                    ⬆ JSON
-                </button>
-
-                <button id="load-drive-btn" class="col-span-2 flex items-center justify-center gap-2 p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-xs hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-200">
-                    📂 Ouvrir Drive
-                </button>
-                
-                <input type="file" id="json-file-input" accept=".json" class="hidden">
-            </div>
-
-            <div class="h-px bg-gray-200 dark:bg-gray-600 my-2"></div>
-
-            <div class="flex items-center justify-between">
-                <button id="dark-mode-toggle" class="p-2 text-gray-500 hover:text-yellow-500 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="Mode Sombre/Clair">
-                    🌙
-                </button>
-                <button id="toggle-legend-pos-btn" class="flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors">
-                    <span id="legend-pos-text">Sidebar à Gauche</span>
-                    <span id="legend-pos-icon">⬅</span>
-                </button>
-            </div>
-        </div>
-    </aside>
-
-    <div class="max-w-5xl mx-auto px-4 pb-20 pt-8 transition-all">
-        <div class="mb-8 text-center">
-            <input type="text" id="main-title" 
-                   class="text-4xl font-extrabold text-gray-800 dark:text-white bg-transparent border-b-2 border-transparent focus:border-gray-400 focus:outline-none w-full p-2 text-center transition-colors" 
-                   value="Nouveau Projet F.O.R.G.E." 
-                   placeholder="Titre du projet">
-        </div>
-
-        <main id="pillars-container" class="space-y-6 min-h-[100px]"></main>
-        
-        <div class="mt-12 text-center no-print">
-            <button id="add-pillar-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 inline-flex items-center gap-2">
-                <span class="text-xl">+</span> Ajouter un Pilier
-            </button>
-        </div>
-    </div>
-
-    <div id="toast-container"></div>
-    <div id="folder-picker-modal" class="fixed inset-0 bg-gray-800/90 flex items-center justify-center p-4 z-[110] hidden no-print">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md flex flex-col max-h-[70vh]">
-            <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900 rounded-t-lg">
-                <h3 class="font-semibold text-gray-700 dark:text-white">Choisir un dossier</h3>
-                <button id="close-folder-picker" class="text-gray-400 hover:text-white">✕</button>
-            </div>
-            <div id="folder-list-container" class="flex-grow overflow-y-auto p-2 space-y-1 dark:text-gray-200"></div>
-            <div class="p-3 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-b-lg text-center">
-                <button id="create-app-folder-btn" class="text-blue-600 dark:text-blue-400 text-sm hover:underline">+ Créer dossier "F.O.R.G.E. Projects"</button>
-            </div>
-        </div>
-    </div>
-    <div id="markdown-modal" class="fixed inset-0 bg-gray-900/90 flex items-center justify-center p-4 z-[100] hidden no-print">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col">
-            <div class="flex justify-between items-center p-4 border-b dark:border-gray-700">
-                <h3 class="text-xl font-semibold dark:text-white">Markdown</h3>
-                <button id="close-md-modal-btn" class="text-gray-400 hover:text-white">✕</button>
-            </div>
-            <div class="p-6 overflow-y-auto">
-                <pre id="markdown-output" class="bg-gray-50 dark:bg-gray-900 dark:text-gray-300 p-4 rounded-md text-sm whitespace-pre-wrap"></pre>
-            </div>
-            <div class="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-b-lg">
-                <button id="copy-md-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg">Copier</button>
-            </div>
-        </div>
-    </div>
-    <div id="drive-modal" class="fixed inset-0 bg-gray-900/90 flex items-center justify-center p-4 z-[100] hidden no-print">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-lg flex flex-col max-h-[80vh]">
-            <div class="flex justify-between items-center p-4 border-b dark:border-gray-700">
-                <h3 class="text-xl font-semibold dark:text-white">Charger un fichier</h3>
-                <button id="close-drive-modal-btn" class="text-gray-400 hover:text-white">✕</button>
-            </div>
-            <div id="drive-file-list" class="p-4 overflow-y-auto flex-grow bg-gray-50 dark:bg-gray-900"></div>
-        </div>
-    </div>
-
-    <script type="module" src="js/main.js"></script>
-</body>
-</html>
+/* TOOLTIPS CSS PUR (Style GitHub/Vercel) */
+.tooltip-btn {
+    position: relative;
+}
+.tooltip-btn::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -35px; /* Position sous le bouton */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1f2937; /* Gris sombre */
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+    z-index: 100;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+.tooltip-btn::after {
+    /* Petite flèche du tooltip */
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #1f2937 transparent;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+    z-index: 100;
+}
+.tooltip-btn:hover::before,
+.tooltip-btn:hover::after {
+    opacity: 1;
+    visibility: visible;
+}

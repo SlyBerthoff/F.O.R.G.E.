@@ -1,6 +1,8 @@
 # F.O.R.G.E
 FRAMEWORK D'ORDONNANCEMENT DES RÈGLES ET DE GESTION ÉLÉMENTAIRE
+
 [v1.0.0] - Méta-Outil de Structure Markdown & Custom Gems 
+
 Aide à la configuration d'un Gemini Custon Gem via la manipulation de blocs Markdown de niveau II et III
 
 

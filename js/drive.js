@@ -71,7 +71,7 @@ export async function listFolders() {
     }
 }
 
-export async function createAppFolder(folderName = "CustomGem Projects") {
+export async function createAppFolder(folderName = "F.O.R.G.E. - Sauvegarde des Projets") {
     if (!accessToken) return null;
     try {
         const metadata = { name: folderName, mimeType: 'application/vnd.google-apps.folder' };

@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         new Sortable(pillarsContainer, { animation: 150, handle: '.drag-handle-pillar', ghostClass: 'sortable-ghost' });
-        rebuildUi({mainTitle: "Mon Gem Custom", pillars: [{title:"Contexte", subsections:[{title:"Rôle", content:""}]}]});
+        rebuildUi({mainTitle: "Gem sans titre", pillars: [{title:"Contexte", subsections:[{title:"Rôle", content:""}]}]});
 
     } catch (err) {
         console.error("FATAL ERROR in Main:", err);
